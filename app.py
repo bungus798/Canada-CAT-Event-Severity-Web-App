@@ -15,46 +15,100 @@ st.markdown(
     """
 )
 
-# 1) File upload
-files = st.sidebar.file_uploader(
-    "Upload CSVs", type="csv", accept_multiple_files=True
+@st.cache_data
+def load_all_csvs():
+    return {
+        "FL Losses": pd.read_csv("Quantify Case Competition 2025 Case Data FL.csv"),
+        # "Losses 2016–2020": pd.read_csv("data/cases_2016_2020.csv"),
+        # "Major Event 2021": pd.read_csv("data/cases_2021.csv"),
+        # "Special Report 2022": pd.read_csv("data/cases_2022.csv"),
+    }
+
+all_dfs = load_all_csvs()
+
+# ── 2) Let user pick which dataset(s) ───────────────────────────────────────────
+choices = st.sidebar.multiselect(
+    "Select dataset(s) to include", 
+    options=list(all_dfs.keys()), 
+    default=list(all_dfs.keys())[:1]
 )
-if not files:
-    st.sidebar.info("Please upload at least one CSV.")
+if not choices:
+    st.sidebar.warning("Please select at least one dataset.")
     st.stop()
 
+# pull out the DataFrames the user selected
+df_list = [all_dfs[name] for name in choices]
+
+# # 1) File upload
+# files = st.sidebar.file_uploader(
+#     "Upload CSVs", type="csv", accept_multiple_files=True
+# )
+# if not files:
+#     st.sidebar.info("Please upload at least one CSV.")
+#     st.stop()
+
 # 2) Load & validate
+# @st.cache_data
+# def load_csvs(flist):
+#     df_list = []
+#     for f in flist:
+#         df = pd.read_csv(f)
+#         # required cols
+#         for col in ["Provinces","Event_year","Total_losses_in_billions"]:
+#             if col not in df.columns:
+#                 st.error(f"Missing `{col}` in {f.name}")
+#                 st.stop()
+#         df_list.append(df[["Provinces","Event_year","Total_losses_in_billions"]]
+#                        .rename(columns={
+#                            "Event_year":"Year",
+#                            "Total_losses_in_billions":"Loss"
+#                        }))
+#     return pd.concat(df_list, ignore_index=True)
+
+# df = load_csvs(files)
+
+# # 3) Year filter
+# years = sorted(df["Year"].dropna().unique().astype(int))
+# st.sidebar.markdown("### Filter by year")
+# keep = [y for y in years if st.sidebar.checkbox(str(y), value=True)]
+# df = df[df["Year"].isin(keep)]
+# # st.markdown(f"**Records:** {len(df):,}  **Years:** {keep}")
+
+# if df.empty:
+#     st.warning("No data after filtering—try different years.")
+#     st.stop()
+
+# ── 3) Load & validate selected dfs ────────────────────────────────────────────
 @st.cache_data
-def load_csvs(flist):
-    df_list = []
-    for f in flist:
-        df = pd.read_csv(f)
-        # required cols
-        for col in ["Provinces","Event_year","Total_losses_in_billions"]:
+def prep(df_list):
+    out = []
+    for df in df_list:
+        for col in ["Provinces", "Event_year", "Total_losses_in_billions"]:
             if col not in df.columns:
-                st.error(f"Missing `{col}` in {f.name}")
+                st.error(f"Missing `{col}` in one of your preloaded CSVs")
                 st.stop()
-        df_list.append(df[["Provinces","Event_year","Total_losses_in_billions"]]
-                       .rename(columns={
-                           "Event_year":"Year",
-                           "Total_losses_in_billions":"Loss"
-                       }))
-    return pd.concat(df_list, ignore_index=True)
+        out.append(
+            df[["Provinces","Event_year","Total_losses_in_billions"]]
+              .rename(columns={
+                  "Event_year":"Year",
+                  "Total_losses_in_billions":"Loss"
+              })
+        )
+    return pd.concat(out, ignore_index=True)
 
-df = load_csvs(files)
+df = prep(df_list)
 
-# 3) Year filter
+# ── 4) Year filter ─────────────────────────────────────────────────────────────
 years = sorted(df["Year"].dropna().unique().astype(int))
 st.sidebar.markdown("### Filter by year")
 keep = [y for y in years if st.sidebar.checkbox(str(y), value=True)]
 df = df[df["Year"].isin(keep)]
-st.markdown(f"**Records:** {len(df):,}  **Years:** {keep}")
-
+# st.markdown(f"**Records:** {len(df):,}  **Years:** {keep}")
 if df.empty:
     st.warning("No data after filtering—try different years.")
     st.stop()
 
-# 4) Region→Province ISO mapping
+# 5) Region→Province ISO mapping
 region_map = {
     # single provinces
     "ON": ["CA-ON"], "QC": ["CA-QC"], "BC": ["CA-BC"], "AB": ["CA-AB"],
@@ -91,7 +145,7 @@ prov_sum = (
     .agg(TotalLoss=("Loss","sum"))
 )
 
-st.dataframe(prov_sum)
+# st.dataframe(prov_sum)
 
 
 # map CA-XX → full name
@@ -129,10 +183,10 @@ def get_geojson():
         return json.load(r)
 
 can_geo = get_geojson()
-st.write("▶️ GeoJSON province names:", 
-         [feat["properties"]["name"] for feat in can_geo["features"]])
-st.write("🔍 First feature properties:", can_geo["features"][0]["properties"])
-st.write("🔍 All property keys:", list(can_geo["features"][0]["properties"].keys()))
+# st.write("▶️ GeoJSON province names:", 
+#          [feat["properties"]["name"] for feat in can_geo["features"]])
+# st.write("🔍 First feature properties:", can_geo["features"][0]["properties"])
+# st.write("🔍 All property keys:", list(can_geo["features"][0]["properties"].keys()))
 
 # 7) Plot choropleth
 fig = px.choropleth_mapbox(
@@ -143,7 +197,7 @@ fig = px.choropleth_mapbox(
     color="TotalLoss",
     color_continuous_scale="YlOrRd",
     mapbox_style="carto-positron",
-    zoom=3.5,
+    zoom=2.2,
     center={"lat":56.13, "lon":-106.35},
     opacity=0.6,
     labels={"TotalLoss":"Loss (billions)"}
