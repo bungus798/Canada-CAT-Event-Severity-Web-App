@@ -5,16 +5,33 @@ import pandas as pd
 import plotly.express as px
 import urllib.request, json
 
-st.set_page_config(layout="wide")
-st.title("📊 Canada Losses by Province (from your Case CSVs)")
+# ── 0) Page config & theming ──────────────────────────────────────────────────
+st.set_page_config(
+    page_title="Canada CAT‐Event Severity",
+    layout="wide",
+    initial_sidebar_state="expanded",
+)
 st.markdown(
     """
-    1. Upload one or more of your **Case Data** CSVs (they must have columns `Provinces`, `Event_year`, `Total_losses_in_billions`).  
-    2. Pick which years to include via the sidebar checkboxes.  
-    3. See a province-level choropleth of summed losses.
-    """
+    <style>
+    /* hide Streamlit footer & header for a cleaner look */
+    footer 
+    header 
+    </style>
+    """,
+    unsafe_allow_html=True,
 )
 
+# ── 1) Header + instructions ─────────────────────────────────────────────────
+st.title("📊 Average Loss per CAT Event in Canada")
+with st.expander("ℹ️ How it works", expanded=False):
+    st.markdown("""
+    1. Select one or more **preloaded datasets**.  
+    2. Filter the years you want to include.  
+    3. View an interactive choropleth of **average loss per event** by province.
+    """)
+
+# ── 2) Preload CSVs ────────────────────────────────────────────────────────────
 @st.cache_data
 def load_all_csvs():
     return {
@@ -26,7 +43,7 @@ def load_all_csvs():
 
 all_dfs = load_all_csvs()
 
-# ── 2) Let user pick which dataset(s) ───────────────────────────────────────────
+# ── 3) Let user pick which dataset(s) ───────────────────────────────────────────
 choices = st.sidebar.multiselect(
     "Select dataset(s) to include", 
     options=list(all_dfs.keys()), 
@@ -39,46 +56,7 @@ if not choices:
 # pull out the DataFrames the user selected
 df_list = [all_dfs[name] for name in choices]
 
-# # 1) File upload
-# files = st.sidebar.file_uploader(
-#     "Upload CSVs", type="csv", accept_multiple_files=True
-# )
-# if not files:
-#     st.sidebar.info("Please upload at least one CSV.")
-#     st.stop()
-
-# 2) Load & validate
-# @st.cache_data
-# def load_csvs(flist):
-#     df_list = []
-#     for f in flist:
-#         df = pd.read_csv(f)
-#         # required cols
-#         for col in ["Provinces","Event_year","Total_losses_in_billions"]:
-#             if col not in df.columns:
-#                 st.error(f"Missing `{col}` in {f.name}")
-#                 st.stop()
-#         df_list.append(df[["Provinces","Event_year","Total_losses_in_billions"]]
-#                        .rename(columns={
-#                            "Event_year":"Year",
-#                            "Total_losses_in_billions":"Loss"
-#                        }))
-#     return pd.concat(df_list, ignore_index=True)
-
-# df = load_csvs(files)
-
-# # 3) Year filter
-# years = sorted(df["Year"].dropna().unique().astype(int))
-# st.sidebar.markdown("### Filter by year")
-# keep = [y for y in years if st.sidebar.checkbox(str(y), value=True)]
-# df = df[df["Year"].isin(keep)]
-# # st.markdown(f"**Records:** {len(df):,}  **Years:** {keep}")
-
-# if df.empty:
-#     st.warning("No data after filtering—try different years.")
-#     st.stop()
-
-# ── 3) Load & validate selected dfs ────────────────────────────────────────────
+# ── 4) Load & validate selected dfs ────────────────────────────────────────────
 @st.cache_data
 def prep(df_list):
     out = []
@@ -98,7 +76,7 @@ def prep(df_list):
 
 df = prep(df_list)
 
-# ── 4) Year filter ─────────────────────────────────────────────────────────────
+# ── 5) Year filter ────────────────────────────────────────────────────────────
 years = sorted(df["Year"].dropna().unique().astype(int))
 st.sidebar.markdown("### Filter by year")
 keep = [y for y in years if st.sidebar.checkbox(str(y), value=True)]
@@ -108,7 +86,7 @@ if df.empty:
     st.warning("No data after filtering—try different years.")
     st.stop()
 
-# 5) Region→Province ISO mapping
+# ── 6) Region→Province ISO mapping ────────────────────────────────────────────
 region_map = {
     # single provinces
     "ON": ["CA-ON"], "QC": ["CA-QC"], "BC": ["CA-BC"], "AB": ["CA-AB"],
@@ -138,14 +116,13 @@ def split_to_iso(s):
 df["ISO"] = df["Provinces"].apply(split_to_iso)
 df_exp = df.explode("ISO")
 
-# 6) Aggregate
+# 7) Aggregate
 prov_sum = (
     df_exp
     .groupby("ISO", as_index=False)
     .agg(TotalLoss=("Loss","sum"))
 )
 
-# st.dataframe(prov_sum)
 # map CA-XX → full name
 iso_to_name = {
     "CA-ON":"Ontario",
@@ -163,16 +140,7 @@ iso_to_name = {
     "CA-NU":"Nunavut",
 }
 
-# # create a column with the exact names
-# prov_sum["prov_name"] = prov_sum["ISO"].map(iso_to_name)
-
-# # sanity-check that you got them all
-# missing = prov_sum[prov_sum["prov_name"].isna()]
-# if not missing.empty:
-#     st.error("Missing mapping for: " + ", ".join(missing["ISO"].unique()))
-#     st.stop()
-
-# 5) Aggregate: sum losses & count events
+# 8) Aggregate: sum losses & count events
 prov_summary = (
     df_exp
     .groupby("ISO", as_index=False)
@@ -182,7 +150,7 @@ prov_summary = (
     )
 )
 
-# 6) Compute severity = total loss / number of events
+# 9) Compute severity = total loss / number of events
 prov_summary["Severity"] = prov_summary["TotalLoss"] / prov_summary["EventCount"]
 
 # map CA-XX → full name (same as before)
@@ -194,7 +162,13 @@ if not missing.empty:
     st.error("Missing mapping for: " + ", ".join(missing["ISO"].unique()))
     st.stop()
 
-# 6) Load Canada GeoJSON
+# 9.1) Summary metrics
+col1, col2, col3 = st.columns(3)
+col1.metric("📆 Years", f"{min(keep)} – {max(keep)}")
+col2.metric("🔢 Total Events", f"{int(prov_summary['EventCount'].sum()):,}")
+col3.metric("💸 Avg. Severity", f"{prov_summary['Severity'].mean():.2f} billion")
+
+# 10) Load Canada GeoJSON
 @st.cache_data
 def get_geojson():
     url = "https://raw.githubusercontent.com/codeforgermany/click_that_hood/master/public/data/canada.geojson"
@@ -202,29 +176,8 @@ def get_geojson():
         return json.load(r)
 
 can_geo = get_geojson()
-# st.write("▶️ GeoJSON province names:", 
-#          [feat["properties"]["name"] for feat in can_geo["features"]])
-# st.write("🔍 First feature properties:", can_geo["features"][0]["properties"])
-# st.write("🔍 All property keys:", list(can_geo["features"][0]["properties"].keys()))
 
-# # 7) Plot choropleth
-# fig = px.choropleth_mapbox(
-#     prov_sum,
-#     geojson=can_geo,
-#     locations="prov_name",              # use your mapped names
-#     featureidkey="properties.name",     # match the "name" field in the GeoJSON
-#     color="TotalLoss",
-#     color_continuous_scale="YlOrRd",
-#     mapbox_style="carto-positron",
-#     zoom=2.2,
-#     center={"lat":56.13, "lon":-106.35},
-#     opacity=0.6,
-#     labels={"TotalLoss":"Loss (billions)"}
-# )
-# fig.update_layout(margin={"r":0,"t":30,"l":0,"b":0},
-#                   title="Total Loss by Province")
-# st.plotly_chart(fig, use_container_width=True)
-# 7) Plot choropleth of severity
+# 11) Plot choropleth of severity
 fig = px.choropleth_mapbox(
     prov_summary,
     geojson=can_geo,
