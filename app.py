@@ -19,9 +19,9 @@ st.markdown(
 def load_all_csvs():
     return {
         "FL Losses": pd.read_csv("Quantify Case Competition 2025 Case Data FL.csv"),
-        # "Losses 2016–2020": pd.read_csv("data/cases_2016_2020.csv"),
-        # "Major Event 2021": pd.read_csv("data/cases_2021.csv"),
-        # "Special Report 2022": pd.read_csv("data/cases_2022.csv"),
+        "HL Losses": pd.read_csv("Quantify Case Competition 2025 Case Data HL.csv"),
+        "FI Losses": pd.read_csv("Quantify Case Competition 2025 Case Data FI.csv"),
+        "WS Losses": pd.read_csv("Quantify Case Competition 2025 Case Data WS.csv"),
     }
 
 all_dfs = load_all_csvs()
@@ -138,7 +138,7 @@ def split_to_iso(s):
 df["ISO"] = df["Provinces"].apply(split_to_iso)
 df_exp = df.explode("ISO")
 
-# 5) Aggregate
+# 6) Aggregate
 prov_sum = (
     df_exp
     .groupby("ISO", as_index=False)
@@ -146,8 +146,6 @@ prov_sum = (
 )
 
 # st.dataframe(prov_sum)
-
-
 # map CA-XX → full name
 iso_to_name = {
     "CA-ON":"Ontario",
@@ -165,15 +163,36 @@ iso_to_name = {
     "CA-NU":"Nunavut",
 }
 
-# create a column with the exact names
-prov_sum["prov_name"] = prov_sum["ISO"].map(iso_to_name)
+# # create a column with the exact names
+# prov_sum["prov_name"] = prov_sum["ISO"].map(iso_to_name)
 
-# sanity-check that you got them all
-missing = prov_sum[prov_sum["prov_name"].isna()]
+# # sanity-check that you got them all
+# missing = prov_sum[prov_sum["prov_name"].isna()]
+# if not missing.empty:
+#     st.error("Missing mapping for: " + ", ".join(missing["ISO"].unique()))
+#     st.stop()
+
+# 5) Aggregate: sum losses & count events
+prov_summary = (
+    df_exp
+    .groupby("ISO", as_index=False)
+    .agg(
+        TotalLoss   = ("Loss",  "sum"),
+        EventCount  = ("Loss",  "count")
+    )
+)
+
+# 6) Compute severity = total loss / number of events
+prov_summary["Severity"] = prov_summary["TotalLoss"] / prov_summary["EventCount"]
+
+# map CA-XX → full name (same as before)
+prov_summary["prov_name"] = prov_summary["ISO"].map(iso_to_name)
+
+# sanity-check
+missing = prov_summary[prov_summary["prov_name"].isna()]
 if not missing.empty:
     st.error("Missing mapping for: " + ", ".join(missing["ISO"].unique()))
     st.stop()
-
 
 # 6) Load Canada GeoJSON
 @st.cache_data
@@ -188,20 +207,39 @@ can_geo = get_geojson()
 # st.write("🔍 First feature properties:", can_geo["features"][0]["properties"])
 # st.write("🔍 All property keys:", list(can_geo["features"][0]["properties"].keys()))
 
-# 7) Plot choropleth
+# # 7) Plot choropleth
+# fig = px.choropleth_mapbox(
+#     prov_sum,
+#     geojson=can_geo,
+#     locations="prov_name",              # use your mapped names
+#     featureidkey="properties.name",     # match the "name" field in the GeoJSON
+#     color="TotalLoss",
+#     color_continuous_scale="YlOrRd",
+#     mapbox_style="carto-positron",
+#     zoom=2.2,
+#     center={"lat":56.13, "lon":-106.35},
+#     opacity=0.6,
+#     labels={"TotalLoss":"Loss (billions)"}
+# )
+# fig.update_layout(margin={"r":0,"t":30,"l":0,"b":0},
+#                   title="Total Loss by Province")
+# st.plotly_chart(fig, use_container_width=True)
+# 7) Plot choropleth of severity
 fig = px.choropleth_mapbox(
-    prov_sum,
+    prov_summary,
     geojson=can_geo,
-    locations="prov_name",              # use your mapped names
-    featureidkey="properties.name",     # match the "name" field in the GeoJSON
-    color="TotalLoss",
+    locations="prov_name",              # province names
+    featureidkey="properties.name",     # match GeoJSON “name”
+    color="Severity",                   # ← now using Severity
     color_continuous_scale="YlOrRd",
     mapbox_style="carto-positron",
     zoom=2.2,
     center={"lat":56.13, "lon":-106.35},
     opacity=0.6,
-    labels={"TotalLoss":"Loss (billions)"}
+    labels={"Severity":"Loss per Event (billion)"}
 )
-fig.update_layout(margin={"r":0,"t":30,"l":0,"b":0},
-                  title="Total Loss by Province")
+fig.update_layout(
+    margin={"r":0,"t":30,"l":0,"b":0},
+    title="Average Loss per CAT Event by Province"
+)
 st.plotly_chart(fig, use_container_width=True)

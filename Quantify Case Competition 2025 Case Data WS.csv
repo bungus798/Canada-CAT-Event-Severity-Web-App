@@ -1,0 +1,22 @@
+CAT_Event,Provinces,Event_year,Total_exposure_in_billions,Total_losses_in_billions,Max_rainfall_mm,Max_wind_km/h
+Winterstorm_1,ON,2014,7.85997,0.05985,35,90
+Winterstorm_2,"ON, QC",2016,7.86097,0.10557,51,100
+Winterstorm_3,"BC, Praries",2017,1.53638,0.05192,67,109
+Winterstorm_4,BC,2017,5.93632,0.24573,76,136
+Winterstorm_5,"QC, Maritimes",2017,8.01955,0.07857,44,91
+Winterstorm_6,"BC, AB",2018,8.03962,0.08157,67,122
+Winterstorm_7,"ON, QC, Maritimes",2019,7.70564,0.06918,42,98
+Winterstorm_8,"BC, AB",2019,6.77492,0.28445,69,147
+Winterstorm_9,"BC, Priaries",2019,8.64462,0.19603,62,104
+Winterstorm_10,Maritimes,2019,2.95837,0.03766,50,98
+Winterstorm_11,"ON, QC",2020,7.2854,0.04639,59,100
+Winterstorm_12,Maritimes,2020,1.30685,0.01702,56,92
+Winterstorm_13,Praries,2021,7.42593,0.00243,33,90
+Winterstorm_14,"ON, QC, Maritimes",2021,7.73291,0.00496,38,96
+Winterstorm_15,BC,2021,3.26934,0.21328,40,116
+Winterstorm_16,"ON, QC",2021,6.39501,0.15683,35,128
+Winterstorm_17,Maritimes,2022,1.64832,0.08375,82,99
+Winterstorm_18,"ON, QC, Maritimes",2023,6.99412,0.02763,60,103
+Winterstorm_19,"QC, Maritimes",2023,8.31324,0.15724,62,129
+Winterstorm_20,"BC, AB",2023,7.73458,0.10458,52,116
+Winterstorm_21,"ON, QC, Maritimes",2024,7.93602,0.25379,71,148
