@@ -16,7 +16,7 @@ A Streamlit application that lets you explore the **average loss per catastrophi
 
 ## Table of Contents
 
-1. [Demo Screenshot](#demo-screenshot)  
+1. [Demo](#demo-screenshot)  
 2. [Installation](#installation)  
 3. [Usage](#usage)  
 4. [Project Structure](#project-structure)  
@@ -26,6 +26,10 @@ A Streamlit application that lets you explore the **average loss per catastrophi
 8. [License](#license)
 
 ---
+
+## Live Demo
+
+[Try the app in your browser →](https://quantifyheatmap-x9rs26tpfisbyn8s9inrox.streamlit.app/)
 
 ## Demo Screenshot
 
