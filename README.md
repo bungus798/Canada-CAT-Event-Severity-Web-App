@@ -41,10 +41,10 @@ A Streamlit application that lets you explore the **average loss per catastrophi
 
 1. **Clone the repo**  
    
-   \\\`\\\`\\\`bash  
+   ```bash  
    git clone https://github.com/yourusername/canada-cat-severity.git  
    cd canada-cat-severity  
-   \\\`\\\`\\\`
+   ```
 
 2. **Create & activate a Python virtual environment**  
    
