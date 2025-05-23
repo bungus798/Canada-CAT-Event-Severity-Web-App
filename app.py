@@ -35,10 +35,10 @@ with st.expander("ℹ️ How it works", expanded=False):
 @st.cache_data
 def load_all_csvs():
     return {
-        "FL Losses": pd.read_csv("Quantify Case Competition 2025 Case Data FL.csv"),
-        "HL Losses": pd.read_csv("Quantify Case Competition 2025 Case Data HL.csv"),
-        "FI Losses": pd.read_csv("Quantify Case Competition 2025 Case Data FI.csv"),
-        "WS Losses": pd.read_csv("Quantify Case Competition 2025 Case Data WS.csv"),
+        "Flood Losses": pd.read_csv("./data/Quantify Case Competition 2025 Case Data FL.csv"),
+        "Hail Losses": pd.read_csv("./data/Quantify Case Competition 2025 Case Data HL.csv"),
+        "Fire Losses": pd.read_csv("./data/Quantify Case Competition 2025 Case Data FI.csv"),
+        "Windstorm Losses": pd.read_csv("./data/Quantify Case Competition 2025 Case Data WS.csv"),
     }
 
 all_dfs = load_all_csvs()
