@@ -16,7 +16,7 @@ A Streamlit application that lets you explore the **average loss per catastrophi
 
 ## Table of Contents
 
-1. [Demo](#demo-screenshot)  
+1. [Demo](#live-demo)  
 2. [Installation](#installation)  
 3. [Usage](#usage)  
 4. [Project Structure](#project-structure)  
