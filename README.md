@@ -48,17 +48,17 @@ A Streamlit application that lets you explore the **average loss per catastrophi
 
 2. **Create & activate a Python virtual environment**  
    
-   \\\`\\\`\\\`bash  
+   ```bash  
    python3 -m venv .venv  
    source .venv/bin/activate      # macOS/Linux  
    .\\.venv\\Scripts\\Activate.ps1   # Windows PowerShell  
-   \\\`\\\`\\\`
+   ```
 
 3. **Install dependencies**  
    
-   \\\`\\\`\\\`bash  
+   ```bash  
    pip install -r requirements.txt  
-   \\\`\\\`\\\`
+   ```
 
 ---
 
@@ -67,9 +67,9 @@ A Streamlit application that lets you explore the **average loss per catastrophi
 1. **Ensure your CSV data files** (see [Data Files](#data-files)) are in the project root.  
 2. **Run the app**  
    
-   \\\`\\\`\\\`bash  
+   ```bash  
    streamlit run app.py  
-   \\\`\\\`\\\`
+   ```
 
 3. **Interact via your browser**  
    - Use the **sidebar** to select datasets and years.  
@@ -80,7 +80,7 @@ A Streamlit application that lets you explore the **average loss per catastrophi
 
 ## Project Structure
 
-\\\`\\\`\\\`text  
+```text  
 .  
 ├── app.py  
 ├── requirements.txt  
@@ -90,7 +90,7 @@ A Streamlit application that lets you explore the **average loss per catastrophi
 ├── Quantify Case Competition 2025 Case Data WS.csv  
 └── assets/  
     └── demo.png  
-\\\`\\\`\\\`
+```
 
 - **app.py**  
   Main Streamlit application (see code comments for sections: config, data-loading, filtering, aggregation, plotting).  
@@ -132,9 +132,9 @@ The app maps “Provinces” entries (e.g., `"ON"`, `"Maritimes"`) to ISO codes 
 
 Install with:  
    
-\\\`\\\`\\\`bash  
+```bash  
 pip install streamlit pandas plotly  
-\\\`\\\`\\\`
+```
 
 ---
 
