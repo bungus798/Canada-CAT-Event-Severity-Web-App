@@ -82,14 +82,12 @@ A Streamlit application that lets you explore the **average loss per catastrophi
 
 ```text  
 .  
-├── app.py  
-├── requirements.txt  
-├── Quantify Case Competition 2025 Case Data FL.csv  
-├── Quantify Case Competition 2025 Case Data HL.csv  
-├── Quantify Case Competition 2025 Case Data FI.csv  
-├── Quantify Case Competition 2025 Case Data WS.csv  
+├── app.py
+├── __init__.py
+├── requirements.txt
+├── README.md
+├── data/  
 └── assets/  
-    └── demo.png  
 ```
 
 - **app.py**  
