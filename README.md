@@ -6,7 +6,7 @@ A Streamlit application that lets you explore the **average loss per catastrophi
 
 ## Features
 
-- **Multiple datasets**: Toggle between FL, HL, FI, and WS loss-data CSVs.  
+- **Multiple datasets**: Toggle between Flood, Hail, Fire, and Windstorm loss-data CSVs.  
 - **Year filtering**: Pick which event years to include via sidebar checkboxes.  
 - **Data validation**: Auto-checks for required columns and valid region/province codes.  
 - **Summary metrics**: Displays total years spanned, total event count, and overall average severity.  
@@ -97,7 +97,7 @@ A Streamlit application that lets you explore the **average loss per catastrophi
 - **requirements.txt**  
   Python packages: Streamlit, pandas, plotly, etc.  
 - **CSV files**  
-  Four preloaded datasets (FL, HL, FI, WS).  
+  Four preloaded datasets (Flood Loss, Hail Loss, Fire Loss, Windstorm Loss).  
 - **assets/**  
   Contains demo screenshot or any static assets.
 
